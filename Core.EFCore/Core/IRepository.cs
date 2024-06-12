@@ -1,4 +1,4 @@
-namespace Core;
+namespace Core.EFCore.Core;
 
 public interface IRepository : IReadOnlyRepository
 {

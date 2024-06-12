@@ -1,7 +1,5 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "Core\Core.csproj", "{AA5FE85D-3E14-43ED-8ECB-C0F797825E59}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.EFCore", "Core.EFCore\Core.EFCore.csproj", "{CDF49B1D-EFC7-4195-8164-C216D791DC48}"
 EndProject
 Global
@@ -10,10 +8,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{AA5FE85D-3E14-43ED-8ECB-C0F797825E59}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AA5FE85D-3E14-43ED-8ECB-C0F797825E59}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AA5FE85D-3E14-43ED-8ECB-C0F797825E59}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AA5FE85D-3E14-43ED-8ECB-C0F797825E59}.Release|Any CPU.Build.0 = Release|Any CPU
 		{CDF49B1D-EFC7-4195-8164-C216D791DC48}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{CDF49B1D-EFC7-4195-8164-C216D791DC48}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CDF49B1D-EFC7-4195-8164-C216D791DC48}.Release|Any CPU.ActiveCfg = Release|Any CPU

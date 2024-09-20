@@ -1,42 +1,126 @@
 name: Build and publish package
-
-# Controls when the action will run. Triggers the workflow on push or pull request 
-# events but only for the master branch
 on:
-  push:
-    tags: [ 'v*.*.*' ]
-
+  workflow_dispatch:
+    inputs:
+      package:
+        type: choice
+        description: Select Package To Build
+        options:
+          - Core.EFCore
+          - Encryption.EFCore
+          
+env:
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+  DOTNET_NOLOGO: true
+  NuGetDirectory: ${{ github.workspace }}/nuget
+  
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
+  create-nuget-package:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v3
-      
-      - name: Setup .NET Core
-        uses: actions/setup-dotnet@v3.2.0
         with:
-          dotnet-version: '6.0.*'
+          fetch-depth: 0
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.*'
           # Authenticates packages to push to GPR
           source-url: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
         env:
           NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    
-      - name: Install dependencies
-        run: dotnet restore Core.EFCore
+
+      - name: Restore Dependencies
+        run: dotnet restore ${{ inputs.package }}
+
+      - name: Build project
+        run: dotnet build ${{ inputs.package }} -c Release --no-restore
+
+      - name: Package Project
+        run: dotnet pack ${{ inputs.package }} --no-build -c Release -o ${{ env.NuGetDirectory }}
         env:
           NUGET_AUTH_TOKEN: ${{ github.token }}
-        
-      - name: Build
-        run: dotnet build Core.EFCore -c Release --no-restore
-      
-      - name: Pack
-        run: dotnet pack --no-build -c Release
-      
-      - name: Push
-        run: dotnet nuget push **/*.nupkg --no-symbols --skip-duplicate
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: nuget-packages
+          if-no-files-found: error
+          retention-days: 1
+          path: ${{ env.NuGetDirectory }}/*.nupkg
+          
+  validate-nuget-package:
+    runs-on: ubuntu-latest
+    needs: [ create-nuget-package ]
+    steps:
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v4
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: nuget-packages
+          path: ${{ env.NuGetDirectory }}
+
+      - name: Install nuget validator
+        run: dotnet tool update Meziantou.Framework.NuGetPackageValidation.Tool --global
+
+      - name: Validate NuGet Package
+        run: meziantou.validate-nuget-package ${{ env.NuGetDirectory }}/*.nupkg --rules AssembliesMustBeOptimized
+  
+  publish-nuget-package:
+    runs-on: ubuntu-latest
+    needs: [ validate-nuget-package ]
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: nuget-packages
+          path: ${{ env.NuGetDirectory }}
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.*'
+          source-url: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
         env:
           NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish Package
+        run: dotnet nuget push ${{ env.NuGetDirectory }}/*.nupkg --no-symbols --skip-duplicate
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+          
+  # This workflow contains a single job called "build"
+  #build:
+    # The type of runner that the job will run on
+  #  runs-on: ubuntu-latest
+  #  steps:
+  #    - name: Checkout repository
+  #      uses: actions/checkout@v3
+      
+  #    - name: Setup .NET Core
+  #      uses: actions/setup-dotnet@v4
+  #      with:
+  #        dotnet-version: '8.0.*'
+          # Authenticates packages to push to GPR
+  #        source-url: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+  #      env:
+  #        NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+  #    - name: Install dependencies
+  #      run: dotnet restore ${{ inputs.package }}
+  #      env:
+  #        NUGET_AUTH_TOKEN: ${{ github.token }}
+        
+  #    - name: Build
+  #      run: dotnet build ${{ inputs.package }} -c Release --no-restore
+      
+  #    - name: Pack
+  #      run: dotnet pack --no-build -c Release
+      
+ #     - name: Push
+ #       run: dotnet nuget push **/*.nupkg --no-symbols --skip-duplicate
+ #       env:
+ #         NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

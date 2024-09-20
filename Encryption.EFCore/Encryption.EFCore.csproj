@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PackOnBuild>true</PackOnBuild>
+    <PackageVersion>1.0.1</PackageVersion>
+    <Authors>Kevin Mollencopf</Authors>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <Owners>Kevin Mollencopf</Owners>
+    <PackageIconUrl>https://github.com/kmdeveloping/DataAccessGenerics.EFCore/raw/main/Encryption.EFCore/icon.png</PackageIconUrl>
+    <PackageProjectUrl>https://github.com/kmdeveloping/DataAccessGenerics.EFCore</PackageProjectUrl>
+    <Summary>Encrypt &amp; Decrypt your databases columns using EntityFramework Core.</Summary>
+    <PackageTags>entityframeworkcore, encryption, encrypt sql, encrypt column, entityframework</PackageTags>
+    <Title>Encryption.EFCore</Title>
+    <Description>Use EncryptColumn attribute and your database columns encrtypted. Automatic encrypt and decrypt your columns.</Description>
+    <PackageId>Encryption.EFCore</PackageId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.8" />
+    <PackageReference Include="NuGet.Build.Packaging" Version="0.2.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+</Project>

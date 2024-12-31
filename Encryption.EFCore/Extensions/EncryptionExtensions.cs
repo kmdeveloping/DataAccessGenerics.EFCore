@@ -18,7 +18,7 @@ public static class EncryptionExtensions
         {
             foreach (IMutableProperty property in entityType.GetProperties())
             {
-                if(property.ClrType == typeof(string) && !IsDiscriminator(property))
+                if(property.ClrType == typeof(string) && !property.IsDiscriminator())
                 {
                     object[] attributes = property.PropertyInfo.GetCustomAttributes(typeof(EncryptColumnAttribute), false);
                     if(attributes.Any())
@@ -29,5 +29,5 @@ public static class EncryptionExtensions
 
     }
 
-    private static bool IsDiscriminator(IMutableProperty property) => property.Name == "Discriminator" || property.PropertyInfo == null;
+    private static bool IsDiscriminator(this IMutableProperty property) => property.Name == "Discriminator" || property.PropertyInfo == null;
 }

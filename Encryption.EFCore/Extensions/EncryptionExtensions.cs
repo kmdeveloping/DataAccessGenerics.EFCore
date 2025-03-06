@@ -14,16 +14,14 @@ public static class EncryptionExtensions
             throw new ArgumentNullException(nameof(encryptionProvider), "You should create encryption provider.");
 
         var encryptionConverter = new EncryptionConverter(encryptionProvider);
-        foreach (IMutableEntityType entityType in modelBuilder.Model.GetEntityTypes())
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
-            foreach (IMutableProperty property in entityType.GetProperties())
+            foreach (var property in entityType.GetProperties())
             {
-                if(property.ClrType == typeof(string) && !property.IsDiscriminator())
-                {
-                    object[] attributes = property.PropertyInfo.GetCustomAttributes(typeof(EncryptColumnAttribute), false);
-                    if(attributes.Any())
-                        property.SetValueConverter(encryptionConverter);
-                }
+                if (property.ClrType != typeof(string) || property.IsDiscriminator()) continue;
+                
+                var attributes = property.PropertyInfo!.GetCustomAttributes(typeof(EncryptColumnAttribute), false);
+                if(attributes.Length > 0) property.SetValueConverter(encryptionConverter);
             }
         }
 

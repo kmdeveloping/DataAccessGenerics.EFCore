@@ -18,30 +18,20 @@ public class GenerateEncryptionProvider(string encryptionKey) : IEncryptionProvi
 
         if (string.IsNullOrEmpty(textToEncrypt))
             return string.Empty;
-                
-        byte[] iv = new byte[16];
-        byte[] array;
 
-        using (Aes aes = Aes.Create())
-        {
-            aes.Key = Encoding.UTF8.GetBytes(encryptionKey);
-            aes.IV = iv;
+        var iv = new byte[16];
 
-            ICryptoTransform encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
-            using (MemoryStream memoryStream = new MemoryStream())
-            {
-                using (CryptoStream cryptoStream = new CryptoStream((Stream)memoryStream, encryptor, CryptoStreamMode.Write))
-                {
-                    using (StreamWriter streamWriter = new StreamWriter((Stream)cryptoStream))
-                    {
-                        streamWriter.Write(textToEncrypt);
-                    }
-                    array = memoryStream.ToArray();
-                }
-            }
-        }
-        string result = Convert.ToBase64String(array);
-        return result;
+        using var aes = Aes.Create();
+        aes.Key = Encoding.UTF8.GetBytes(encryptionKey);
+        aes.IV = iv;
+        var encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
+
+        using var memoryStream = new MemoryStream();
+        using var cryptoStream = new CryptoStream(memoryStream, encryptor, CryptoStreamMode.Write);
+        using var streamWriter = new StreamWriter(cryptoStream);
+        streamWriter.Write(textToEncrypt);
+        
+        return Convert.ToBase64String(memoryStream.ToArray());
     }
 
     public string Decrypt(string textToDecrypt)
@@ -52,24 +42,16 @@ public class GenerateEncryptionProvider(string encryptionKey) : IEncryptionProvi
         if (string.IsNullOrEmpty(textToDecrypt))
             return string.Empty;
                 
-        byte[] iv = new byte[16];
-        using (Aes aes = Aes.Create())
-        {
-            aes.Key = Encoding.UTF8.GetBytes(encryptionKey);
-            aes.IV = iv;
-            ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
+        var iv = new byte[16];
+        using var aes = Aes.Create();
+        aes.Key = Encoding.UTF8.GetBytes(encryptionKey);
+        aes.IV = iv;
+        var decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
 
-            var buffer = Convert.FromBase64String(textToDecrypt);
-            using (MemoryStream memoryStream = new MemoryStream(buffer))
-            {
-                using (CryptoStream cryptoStream = new CryptoStream((Stream)memoryStream, decryptor, CryptoStreamMode.Read))
-                {
-                    using (StreamReader streamReader = new StreamReader((Stream)cryptoStream))
-                    {
-                        return streamReader.ReadToEnd();
-                    }
-                }
-            }
-        }
+        var buffer = Convert.FromBase64String(textToDecrypt);
+        using var memoryStream = new MemoryStream(buffer);
+        using var cryptoStream = new CryptoStream((Stream)memoryStream, decryptor, CryptoStreamMode.Read);
+        using var streamReader = new StreamReader((Stream)cryptoStream);
+        return streamReader.ReadToEnd();
     }
 }

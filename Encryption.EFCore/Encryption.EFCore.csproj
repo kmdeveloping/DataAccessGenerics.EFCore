@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackOnBuild>true</PackOnBuild>
-    <PackageVersion>1.0.5</PackageVersion>
+    <PackageVersion>1.0.6</PackageVersion>
     <Authors>Kevin Mollencopf</Authors>
     <NeutralLanguage>en-US</NeutralLanguage>
     <Owners>Kevin Mollencopf</Owners>

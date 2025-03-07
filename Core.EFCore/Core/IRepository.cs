@@ -10,8 +10,7 @@ public interface IRepository : IReadOnlyRepository
     /// <param name="createdBy"></param>
     /// <param name="asNoTracking"></param>
     /// <returns></returns>
-    TEntity Create<TEntity>(TEntity entity, string createdBy = null, bool asNoTracking = false)
-        where TEntity : class, IEntity;
+    TEntity Create<TEntity>(TEntity entity, string createdBy = null, bool asNoTracking = false) where TEntity : class, IEntity;
 
     /// <summary>
     /// Creates a range of entities.
@@ -19,8 +18,7 @@ public interface IRepository : IReadOnlyRepository
     /// <typeparam name="TEntity"></typeparam>
     /// <param name="entities"></param>
     /// <param name="createdBy"></param>
-    void CreateRange<TEntity>(IEnumerable<TEntity> entities, string createdBy = null, bool asNoTracking = false)
-        where TEntity : class, IEntity;
+    void CreateRange<TEntity>(IEnumerable<TEntity> entities, string createdBy = null, bool asNoTracking = false) where TEntity : class, IEntity;
 
     /// <summary>
     /// Updates the specified entity.
@@ -29,8 +27,7 @@ public interface IRepository : IReadOnlyRepository
     /// <param name="entity"></param>
     /// <param name="modifiedBy"></param>
     /// <param name="asNoTracking"></param>
-    void Update<TEntity>(TEntity entity, string modifiedBy = null, bool asNoTracking = false)
-        where TEntity : class, IEntity;
+    void Update<TEntity>(TEntity entity, string modifiedBy = null, bool asNoTracking = false) where TEntity : class, IEntity;
     
     /// <summary>
     /// Updates the specified entity and then saves context.
@@ -39,24 +36,21 @@ public interface IRepository : IReadOnlyRepository
     /// <param name="entity"></param>
     /// <param name="modifiedBy"></param>
     /// <param name="asNoTracking"></param>
-    Task UpdateAndSaveAsync<TEntity>(TEntity entity, string modifiedBy = null, bool asNoTracking = false)
-        where TEntity : class, IEntity;
+    Task UpdateAndSaveAsync<TEntity>(TEntity entity, string modifiedBy = null, bool asNoTracking = false) where TEntity : class, IEntity;
 
     /// <summary>
     /// Deletes the entity with the specified id from the database.
     /// </summary>
     /// <typeparam name="TEntity"></typeparam>
     /// <param name="id"></param>
-    void Delete<TEntity>(object id)
-        where TEntity : class, IEntity;
+    void Delete<TEntity>(object id) where TEntity : class, IEntity;
 
     /// <summary>
     /// Deletes the specified entity.
     /// </summary>
     /// <typeparam name="TEntity"></typeparam>
     /// <param name="entity"></param>
-    void Delete<TEntity>(TEntity entity)
-        where TEntity : class, IEntity;
+    void Delete<TEntity>(TEntity entity) where TEntity : class, IEntity;
 
     /// <summary>
     /// Saves any pending changes to the underlying database.
@@ -122,8 +116,7 @@ public interface IRepository : IReadOnlyRepository
     /// <returns>
     ///     A task that represents the asynchronous operation. The task result is the number of rows affected.
     /// </returns>
-    Task<int> ExecuteSqlInterpolatedAsync(System.FormattableString sqlString,
-        CancellationToken cancellationToken = default(CancellationToken));
+    Task<int> ExecuteSqlInterpolatedAsync(System.FormattableString sqlString, CancellationToken cancellationToken = default(CancellationToken));
 
     /// <summary>
     ///     <para>
@@ -180,6 +173,5 @@ public interface IRepository : IReadOnlyRepository
     /// <returns>
     ///     A task that represents the asynchronous operation. The task result is the number of rows affected.
     /// </returns>
-    Task<int> ExecuteSqlRawAsync(string sql, IEnumerable<object> parameters,
-        CancellationToken cancellationToken = default(CancellationToken));
+    Task<int> ExecuteSqlRawAsync(string sql, IEnumerable<object> parameters, CancellationToken cancellationToken = default(CancellationToken));
 }

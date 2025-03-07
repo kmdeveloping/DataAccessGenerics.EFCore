@@ -4,17 +4,11 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace Core.EFCore.Interceptors;
 
-public class AuditingDatabaseQueryCommandInterceptor : DbCommandInterceptor
+public class AuditingDatabaseQueryCommandInterceptor(ILogger logger) : DbCommandInterceptor
 {
-    private readonly ILogger _logger;
-    
-    public AuditingDatabaseQueryCommandInterceptor(ILogger logger)
-    {
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    }
-    
-        public override InterceptionResult<object> ScalarExecuting(
-        DbCommand command, CommandEventData eventData, InterceptionResult<object> result)
+    private readonly ILogger _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
+    public override InterceptionResult<object> ScalarExecuting(DbCommand command, CommandEventData eventData, InterceptionResult<object> result)
     {
         _logger
             .ForContext("CommandText", command.CommandText)

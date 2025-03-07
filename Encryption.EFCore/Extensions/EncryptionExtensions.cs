@@ -21,7 +21,7 @@ public static class EncryptionExtensions
                 if (property.ClrType != typeof(string) || property.IsDiscriminator()) continue;
                 
                 var attributes = property.PropertyInfo!.GetCustomAttributes(typeof(EncryptColumnAttribute), false);
-                if(attributes.Length > 0) property.SetValueConverter(encryptionConverter);
+                if (attributes.Length > 0) property.SetValueConverter(encryptionConverter);
             }
         }
 

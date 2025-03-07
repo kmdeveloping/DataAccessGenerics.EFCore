@@ -3,25 +3,19 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Core.EFCore;
 
-public class EfRepository<TContext> : EfReadOnlyRepository<TContext>, IRepository where TContext : DbContext
+public class EfRepository<TContext>(TContext context) : EfReadOnlyRepository<TContext>(context), IRepository where TContext : DbContext
 {
-    public EfRepository(TContext context) : base(context)
-    {
-    }
-    
-        public virtual TEntity Create<TEntity>(TEntity entity, string createdBy = null, bool asNoTracking = false)
+    public virtual TEntity Create<TEntity>(TEntity entity, string createdBy = null, bool asNoTracking = false)
         where TEntity : class, IEntity
     {
         var dbSet = Context.Set<TEntity>();
-        if (asNoTracking)
-            dbSet.AsNoTracking();
+        if (asNoTracking) dbSet.AsNoTracking();
+
+        if (entity is not IModifiableEntity modifiableEntity) return dbSet.Add(entity).Entity;
         
-        if (entity is IModifiableEntity modifiableEntity)
-        {
-            if (modifiableEntity.CreatedDt == default)
-                modifiableEntity.CreatedDt = DateTime.UtcNow;
-        }
-        
+        if (modifiableEntity.CreatedDt == default)
+            modifiableEntity.CreatedDt = DateTime.UtcNow;
+
         return dbSet.Add(entity).Entity;
     }
 
@@ -29,17 +23,13 @@ public class EfRepository<TContext> : EfReadOnlyRepository<TContext>, IRepositor
         where TEntity : class, IEntity
     {
         var dbSet = Context.Set<TEntity>();
-        if (asNoTracking)
-            dbSet.AsNoTracking();
+        if (asNoTracking) dbSet.AsNoTracking();
         
         var entityList = entities.ToList();
         foreach (var entity in entityList)
         {
-            if (entity is IModifiableEntity modifiableEntity)
-            {
-                if(modifiableEntity.CreatedDt == default)
-                    modifiableEntity.CreatedDt = DateTime.UtcNow;
-            }
+            if (entity is not IModifiableEntity modifiableEntity) continue;
+            if (modifiableEntity.CreatedDt == default) modifiableEntity.CreatedDt = DateTime.UtcNow;
         }
         dbSet.AddRange(entityList);
     }
@@ -48,15 +38,12 @@ public class EfRepository<TContext> : EfReadOnlyRepository<TContext>, IRepositor
         where TEntity : class, IEntity
     {
         var dbSet = Context.Set<TEntity>();
-        if (asNoTracking)
-            dbSet.AsNoTracking();
+        if (asNoTracking) dbSet.AsNoTracking();
         
-        if (entity is IModifiableEntity)
-            ((IModifiableEntity)entity).ModifiedDt = DateTime.UtcNow;
+        if (entity is IModifiableEntity) ((IModifiableEntity)entity).ModifiedDt = DateTime.UtcNow;
 
         var entityEntry = dbSet.Entry(entity);
-        if (entityEntry.State == EntityState.Detached)
-            dbSet.Attach(entity);
+        if (entityEntry.State == EntityState.Detached) dbSet.Attach(entity);
         
         entityEntry.State = EntityState.Modified;
     }
@@ -65,15 +52,12 @@ public class EfRepository<TContext> : EfReadOnlyRepository<TContext>, IRepositor
         where TEntity : class, IEntity
     {
         var dbSet = Context.Set<TEntity>();
-        if (asNoTracking)
-            dbSet.AsNoTracking();
+        if (asNoTracking) dbSet.AsNoTracking();
         
-        if (entity is IModifiableEntity)
-            ((IModifiableEntity)entity).ModifiedDt = DateTime.UtcNow;
+        if (entity is IModifiableEntity) ((IModifiableEntity)entity).ModifiedDt = DateTime.UtcNow;
 
         var entityEntry = dbSet.Entry(entity);
-        if (entityEntry.State == EntityState.Detached)
-            dbSet.Attach(entity);
+        if (entityEntry.State == EntityState.Detached) dbSet.Attach(entity);
         
         entityEntry.State = EntityState.Modified;
         
@@ -127,25 +111,15 @@ public class EfRepository<TContext> : EfReadOnlyRepository<TContext>, IRepositor
         }
     }
 
-    public virtual int ExecuteSqlInterpolated(System.FormattableString sqlString)
-    {
-        return Context.Database.ExecuteSqlInterpolated(sqlString);
-    }
+    public virtual int ExecuteSqlInterpolated(FormattableString sqlString) => Context.Database.ExecuteSqlInterpolated(sqlString);
 
-    public virtual async Task<int> ExecuteSqlInterpolatedAsync(System.FormattableString sqlString, CancellationToken cancellationToken = default(CancellationToken))
-    {
-        return await Context.Database.ExecuteSqlInterpolatedAsync(sqlString, cancellationToken);
-    }
+    public virtual async Task<int> ExecuteSqlInterpolatedAsync(System.FormattableString sqlString, CancellationToken cancellationToken = default(CancellationToken)) => 
+        await Context.Database.ExecuteSqlInterpolatedAsync(sqlString, cancellationToken);
 
-    public virtual int ExecuteSqlRaw(string sql, IEnumerable<object> parameters)
-    {
-        return Context.Database.ExecuteSqlRaw(sql, parameters);
-    }
+    public virtual int ExecuteSqlRaw(string sql, IEnumerable<object> parameters) => Context.Database.ExecuteSqlRaw(sql, parameters);
 
-    public virtual async Task<int> ExecuteSqlRawAsync(string sql, IEnumerable<object> parameters, CancellationToken cancellationToken = default(CancellationToken))
-    {
-        return await Context.Database.ExecuteSqlRawAsync(sql, parameters, cancellationToken);
-    }
+    public virtual async Task<int> ExecuteSqlRawAsync(string sql, IEnumerable<object> parameters, CancellationToken cancellationToken = default(CancellationToken)) => 
+        await Context.Database.ExecuteSqlRawAsync(sql, parameters, cancellationToken);
 
     protected virtual void ThrowEnhancedValidationException(EntityValidationException e)
     {

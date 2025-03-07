@@ -9,22 +9,19 @@ namespace Core.EFCore.Extensions;
 
 public static class DbContextExtensions
 {
-    public static IServiceCollection AddDbContextWithSslOptions<TContext, TConfig>(
-        this IServiceCollection services, IConfiguration configuration)  
-        where TContext : DbContext 
-        where TConfig : DbContextWithSslOptions, new()
+    public static IServiceCollection AddDbContextWithSslOptions<TContext, TConfig>(this IServiceCollection services, IConfiguration configuration)  
+        where TContext : DbContext where TConfig : DbContextWithSslOptions, new()
     {
-        if (configuration == null) throw new ArgumentNullException(nameof(configuration));
-        
-        TConfig dbContextOptions = new TConfig();
+        ArgumentNullException.ThrowIfNull(configuration);
+
+        var dbContextOptions = new TConfig();
         var dbContextConfigSection = configuration.GetRequiredSection(dbContextOptions.ConfigSectionName);
         dbContextConfigSection.Bind(dbContextOptions);
         
-        string connectionStringName = dbContextOptions.ConnectionStringName;
+        var connectionStringName = dbContextOptions.ConnectionStringName;
         dbContextOptions.ConnectionString = configuration.GetConnectionString(connectionStringName)!;
 
-        return services.AddDbContextWithSslCa<TContext, TConfig>(dbContextOptions,
-            (provider, config) => provider.GetTlsSslCaFileForRds(config));
+        return services.AddDbContextWithSslCa<TContext, TConfig>(dbContextOptions, (provider, config) => provider.GetTlsSslCaFileForRds(config));
     }
     
     /// <summary>
@@ -43,11 +40,11 @@ public static class DbContextExtensions
         where TContext : DbContext
         where TConfig : DbContextWithSslOptions
     {
-        if (getTlsSslCaFileFunc == null) throw new ArgumentNullException(nameof(getTlsSslCaFileFunc));
+        ArgumentNullException.ThrowIfNull(getTlsSslCaFileFunc);
 
         return services.AddDbContext<TContext>((provider, builder) =>
         {
-            int dbConnectionTimeoutInSeconds = configuration.DbCommandTimeoutInSeconds;
+            var dbConnectionTimeoutInSeconds = configuration.DbCommandTimeoutInSeconds;
             
             if (string.IsNullOrEmpty(configuration.ConnectionString))
                 throw new ApplicationException($"No connection string found for {configuration.ConnectionStringName}. Ensure you create a connection string named '{configuration.ConnectionStringName}' in your local secrets.json file, or in parameter store");
@@ -60,22 +57,16 @@ public static class DbContextExtensions
             {
                 var caFilePath = configuration.CertAuthorityFilePath;
                 var caFileInfo = new FileInfo(caFilePath);
-                if (!caFileInfo.Exists)
-                {
-                    // Execute callback to retrieve the file (e.g download from S3...
-                    caFilePath = getTlsSslCaFileFunc(provider, configuration);
-                }
+                if (!caFileInfo.Exists) caFilePath = getTlsSslCaFileFunc(provider, configuration);
+                
                 connStringBuilder.SslCa = caFilePath;
             }
 
             connStringBuilder.AutoEnlist = configuration.AutoEnlist;
 
-            string serverVersion = configuration.DatabaseServerVersion;
-            builder.UseMySql(connStringBuilder.ConnectionString, ServerVersion.Parse(serverVersion),
-                dbContextOptionsBuilder =>
-                {
-                    dbContextOptionsBuilder.CommandTimeout(dbConnectionTimeoutInSeconds);
-                });
+            var serverVersion = configuration.DatabaseServerVersion;
+            builder.UseMySql(connStringBuilder.ConnectionString, ServerVersion.Parse(serverVersion), dbContextOptionsBuilder =>
+                dbContextOptionsBuilder.CommandTimeout(dbConnectionTimeoutInSeconds));
         });
     }
     
@@ -86,15 +77,14 @@ public static class DbContextExtensions
     {
         var filePath = configuration.CertAuthorityFilePath;
         var fileInfo = new FileInfo(filePath);
-        if (!fileInfo.Exists)
-        {
-            // Download file from S3 bucket...
-            var s3Client = provider.GetRequiredService<Amazon.S3.S3Client>();
-            s3Client
-                .DownloadAsync(configuration.S3BucketNameForTlsSslCaFile, configuration.S3ObjectKeyForPemFile, filePath)
-                .GetAwaiter()
-                .GetResult();
-        }
+        if (fileInfo.Exists) return filePath;
+        
+        // Download file from S3 bucket...
+        var s3Client = provider.GetRequiredService<Amazon.S3.S3Client>();
+        s3Client
+            .DownloadAsync(configuration.S3BucketNameForTlsSslCaFile, configuration.S3ObjectKeyForPemFile, filePath)
+            .GetAwaiter()
+            .GetResult();
         return filePath;
     }
 }

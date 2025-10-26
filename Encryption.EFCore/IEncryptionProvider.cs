@@ -11,18 +11,16 @@ public interface IEncryptionProvider
 
 public class GenerateEncryptionProvider(string encryptionKey) : IEncryptionProvider
 {
+    private readonly string _encryptionKey = encryptionKey ?? throw new ArgumentNullException(nameof(encryptionKey), "Please initialize your encryption key.");
+    
     public string Encrypt(string textToEncrypt)
     {
-        if (string.IsNullOrEmpty(encryptionKey))
-            throw new ArgumentNullException(nameof(encryptionKey), "Please initialize your encryption key.");
-
-        if (string.IsNullOrEmpty(textToEncrypt))
-            return string.Empty;
+        if (string.IsNullOrEmpty(textToEncrypt)) return string.Empty;
 
         var iv = new byte[16];
 
         using var aes = Aes.Create();
-        aes.Key = Encoding.UTF8.GetBytes(encryptionKey);
+        aes.Key = Encoding.UTF8.GetBytes(_encryptionKey);
         aes.IV = iv;
         var encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
 
@@ -36,15 +34,11 @@ public class GenerateEncryptionProvider(string encryptionKey) : IEncryptionProvi
 
     public string Decrypt(string textToDecrypt)
     {
-        if (string.IsNullOrEmpty(encryptionKey))
-            throw new ArgumentNullException(nameof(encryptionKey), "Please initialize your encryption key.");
-
-        if (string.IsNullOrEmpty(textToDecrypt))
-            return string.Empty;
+        if (string.IsNullOrEmpty(textToDecrypt)) return string.Empty;
                 
         var iv = new byte[16];
         using var aes = Aes.Create();
-        aes.Key = Encoding.UTF8.GetBytes(encryptionKey);
+        aes.Key = Encoding.UTF8.GetBytes(_encryptionKey);
         aes.IV = iv;
         var decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
 

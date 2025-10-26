@@ -20,12 +20,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
       - name: Setup .NET Core
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '8.0.*'
           # Authenticates packages to push to GPR
@@ -56,7 +56,7 @@ jobs:
     needs: [ create-nuget-package ]
     steps:
       - name: Setup .NET Core
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
 
       - uses: actions/download-artifact@v4
         with:
@@ -79,7 +79,7 @@ jobs:
           path: ${{ env.NuGetDirectory }}
 
       - name: Setup .NET Core
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '8.0.*'
           source-url: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json

@@ -6,6 +6,13 @@ namespace Encryption.EFCore.Extensions;
 
 public static class EncryptionExtensions
 {
+    public static string GenerateEncryptionKey()
+    {
+        using var aes = System.Security.Cryptography.Aes.Create();
+        aes.GenerateKey();
+        return Convert.ToBase64String(aes.Key);
+    }
+    
     public static void UseEncryption(this ModelBuilder modelBuilder, IEncryptionProvider encryptionProvider)
     {
         if (modelBuilder is null)

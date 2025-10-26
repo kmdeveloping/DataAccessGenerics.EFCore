@@ -6,7 +6,7 @@
         <Nullable>enable</Nullable>
         <PackageId>Core.EFCore</PackageId>
         <PackOnBuild>true</PackOnBuild>
-        <PackageVersion>1.0.6</PackageVersion>
+        <PackageVersion>1.0.7</PackageVersion>
         <Authors>Kevin Mollencopf</Authors>
         <Owners>Kevin Mollencopf</Owners>
         <RepositoryUrl>https://github.com/kmdeveloping/DataAccessGenerics.EFCore</RepositoryUrl>
